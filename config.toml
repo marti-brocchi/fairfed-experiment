@@ -1,0 +1,44 @@
+# This is a minimal TOML file for the MNIST example
+# It contains the bare minimum to make the experiment run.
+# See quickstart for more details.
+
+# The TOML is parsed by python as dictionnary with each `[header]`
+# as a key. Note the "=" sign and the absence of quotes around keys.
+# For more details, see the full doc : https://toml.io/en/
+
+[network] # Network configuration used by both client and server
+    protocol = "websockets" # Protocol used, to keep things simple use websocket
+    host = "127.0.0.1" # Address used, works as-is on most set ups
+    port = 8765 # Port used, works as-is on most set ups
+
+[data] # Where to find your data
+    data_folder = "adult"
+    client_names = ["client_0", "client_1", "client_2", "client_3", "client_4"] 
+
+[optim] # Optimization options for both client and server
+    aggregator = "averaging" # Server aggregation strategy
+
+    [optim.client_opt] # Client optimization strategy
+    lrate = 0.01 # Client learning rate
+
+    [optim.server_opt] # Server optimization strategy
+    lrate = 1.0 # Server learning rate
+
+[run] # Training process option for both client and server
+    rounds = 10 # Number of overall training rounds
+
+    [run.register] # Client registration options
+    timeout = 5 # How long to wait for clients, in seconds
+
+    [run.training] # Client training options
+    batch_size = 48 # Training batch size
+
+    [run.evaluate] # Client evaluation options
+    batch_size = 48 # Evaluation batch size
+
+[experiment] # What to report during the experiment and where to report it
+    metrics = [
+        # Multi-label Accuracy, Precision, Recall and F-Score.
+        ["multi-classif", {labels = [0,1]}]
+    ]
+    checkpoint = "./results" # Where to save the results
