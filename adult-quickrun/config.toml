@@ -12,7 +12,7 @@
     port = 8765 # Port used, works as-is on most set ups
 
 [data] # Where to find your data
-    data_folder = "adult"
+    data_folder = "../adult-data"
     client_names = ["client_0", "client_1", "client_2", "client_3", "client_4"] 
 
 [optim] # Optimization options for both client and server
@@ -38,7 +38,6 @@
 
 [experiment] # What to report during the experiment and where to report it
     metrics = [
-        # Multi-label Accuracy, Precision, Recall and F-Score.
-        ["multi-classif", {labels = [0,1]}]
+        "binary-classif",   
     ]
     checkpoint = "./results" # Where to save the results
