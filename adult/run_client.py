@@ -65,8 +65,8 @@ def run_client(
     declearn.utils.set_device_policy(gpu=False)
 
     # Set up logger and checkpointer
-    stamp = datetime.datetime.now().strftime("%y-%m-%d_%H-%M")
-    checkpoint = os.path.join(FILEDIR, f"result_{stamp}", client_name)
+    # stamp = datetime.datetime.now().strftime("%y-%m-%d_%H-%M")
+    checkpoint = os.path.join(FILEDIR, f"results", client_name)
     logger = declearn.utils.get_logger(
         name=client_name,
         fpath=os.path.join(checkpoint, "logs.txt"),

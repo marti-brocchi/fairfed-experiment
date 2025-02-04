@@ -63,18 +63,14 @@ def run_server(
     # Set CPU as device
     declearn.utils.set_device_policy(gpu=False)
 
-    # Set up metrics suitable for MNIST.
+    # Set up metrics suitable for adult (binary classification)
     metrics = declearn.metrics.MetricSet(
-        [
-            declearn.metrics.MulticlassAccuracyPrecisionRecall(
-                labels=range(10)
-            ),
-        ]
+        [declearn.metrics.BinaryAccuracyPrecisionRecall(thresh=0.5, label=1)]
     )
 
     # Set up checkpointing and logging.
-    stamp = datetime.datetime.now().strftime("%y-%m-%d_%H-%M")
-    checkpoint = os.path.join(FILEDIR, f"result_{stamp}", "server")
+    # stamp = datetime.datetime.now().strftime("%y-%m-%d_%H-%M")
+    checkpoint = os.path.join(FILEDIR, f"results", "server")
     # Set up a logger, records from which will go to a file.
     logger = declearn.utils.get_logger(
         name="Server",
@@ -83,18 +79,16 @@ def run_server(
 
     ### (1) Define a model
 
-    # Here we use a tensorflow-implemented small Convolutional Neural Network.
+    # Here we use a tensorflow-implemented small Sequential Neural Network.
     stack = [
-        tf.keras.layers.InputLayer(input_shape=(28, 28, 1)),
-        tf.keras.layers.Conv2D(32, 3, 1, activation="relu"),
-        tf.keras.layers.MaxPool2D(2),
-        tf.keras.layers.Dropout(0.25),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(10, activation="softmax"),
+        tf.keras.layers.InputLayer(shape=[11]),
+        tf.keras.layers.Dense(32, activation="relu"),
+        tf.keras.layers.Dense(16, activation="relu"),
+        tf.keras.layers.Dense(1, activation="sigmoid"),  # Binary classification
     ]
     model = declearn.model.tensorflow.TensorflowModel(
         model=tf.keras.Sequential(stack),
-        loss="sparse_categorical_crossentropy",
+        loss="binary_crossentropy",
     )
 
     ### (2) Define an optimization strategy
@@ -113,7 +107,7 @@ def run_server(
     # Set up the client-side optimizer (for local SGD steps).
     # By default: vanilla SGD, with a selected learning rate.
     client_opt = declearn.optimizer.Optimizer(
-        lrate=0.001,
+        lrate=0.01,
         w_decay=0.0,
         regularizers=None,
         modules=None,
@@ -158,16 +152,16 @@ def run_server(
     )
     # Training rounds hyper-parameters. By default, 1 epoch / round.
     training = declearn.main.config.TrainingConfig(
-        batch_size=32,
+        batch_size=64,
         n_epoch=1,
     )
     # Evaluation rounds. By default, 1 epoch with train's batch size.
     evaluate = declearn.main.config.EvaluateConfig(
-        batch_size=128,
+        batch_size=64,
     )
     # Wrap all this into a FLRunConfig.
     run_config = declearn.main.config.FLRunConfig.from_params(
-        rounds=5,  # you may change the number of training rounds
+        rounds=10,  # you may change the number of training rounds
         register=register,
         training=training,
         evaluate=evaluate,
